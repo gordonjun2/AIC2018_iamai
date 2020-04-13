@@ -1,0 +1,4 @@
+img_path
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img02185.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img01499.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img02339.jpg

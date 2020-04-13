@@ -79,8 +79,13 @@ class TripletLoss(nn.Module):
              A matrix of all pairwise distance between all vectors in a and b,
              will be shape of (B1, B2)
         '''
+        # print("A SHAPE: ", a.unsqueeze(1).shape)
+        # print("B SHAPE: ", b.unsqueeze(0).shape)
         diff = a.unsqueeze(1) - b.unsqueeze(0)
+        # print("DIFF SHAPE: ", diff.shape)
+        print("EUCLIDEAN DIST: ", ((diff**2).sum(2)+1e-12).sqrt())
         return ((diff**2).sum(2)+1e-12).sqrt()
+        # return torch.sum((diff**2), 2, keepdim=True, dtype=None)
 
 if __name__ == '__main__':
     criterion0 = TripletLoss(margin=0.5, batch_hard=False)

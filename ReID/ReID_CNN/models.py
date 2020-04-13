@@ -25,6 +25,8 @@ class FeatureResNet(nn.Module):
     def forward(self,x):
         for name,module in self._modules.items():
             x = nn.parallel.data_parallel(module, x)
+
+        #print("BASE NET OUTPUT SHAPE :", x.shape)
         return x.view(x.size(0), -1)
 
 class ResNet(nn.Module):

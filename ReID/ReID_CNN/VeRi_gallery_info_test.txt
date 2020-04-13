@@ -1,0 +1,7 @@
+img_path
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img01572.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img02601.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40172_101_img01474.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40962_071_img01544.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40141_030_img01542.jpg
+/home/gordonjun/Desktop/CV/AIC2018_iamai/ReID/ReID_CNN/datasets/VRIC/train_images/MVI_40244_119_img00967.jpg

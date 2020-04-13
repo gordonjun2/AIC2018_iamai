@@ -15,6 +15,44 @@ import os
 import numpy as np
 cudnn.benchmark=True
 
+def load_model(model, model_path, optimizer=None, resume=False, 
+            lr=None, lr_step=None):
+    start_epoch = 0
+    checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage)
+    print('loaded {}, epoch {}'.format(model_path, checkpoint['epoch']))
+    state_dict_ = checkpoint['state_dict']
+    state_dict = {}
+
+    # convert data_parallal to model
+    for k in state_dict_:
+        if k.startswith('module') and not k.startswith('module_list'):
+            state_dict[k[7:]] = state_dict_[k]
+        else:
+            state_dict[k] = state_dict_[k]
+    model_state_dict = model.state_dict()
+
+    # check loaded parameters and created model parameters
+    msg = 'If you see this, your model does not fully load the ' + \
+        'pre-trained weight. Please make sure ' + \
+        'you have correctly specified --arch xxx ' + \
+        'or set the correct --num_classes for your own dataset.'
+    for k in state_dict:
+        if k in model_state_dict:
+            if state_dict[k].shape != model_state_dict[k].shape:
+                print('Skip loading parameter {}, required shape{}, '\
+                    'loaded shape{}. {}'.format(
+                    k, model_state_dict[k].shape, state_dict[k].shape, msg))
+                state_dict[k] = model_state_dict[k]
+        else:
+            print('Drop parameter {}.'.format(k) + msg)
+    for k in model_state_dict:
+        if not (k in state_dict):
+            print('No param {}.'.format(k) + msg)
+            state_dict[k] = model_state_dict[k]
+    model.load_state_dict(state_dict, strict=False)
+
+    return model
+
 
 def train_ict(args,Dataset,train_Dataloader,val_Dataloader,net):
 
@@ -47,7 +85,7 @@ def train_ict(args,Dataset,train_Dataloader,val_Dataloader,net):
         pbar.close()
         print('Training total loss = %.3f'%(epoch_loss/iter_count))
         if e % args.save_every_n_epoch == 0:
-            torch.save(net.state_dict(),os.path.join(args.save_model_dir,'model_%d.ckpt'%(e)))
+            torch.save(net.state_dict(),os.path.join(args.save_model_dir,'model_%d.pth'%(e)))
         print('start validation')
         correct_i = []
         correct_c = []
@@ -191,6 +229,7 @@ def train_triplet(args,Dataset,train_Dataloader,val_Dataloader,net):
             b_img = Variable(imgs, volatile=True).cuda()
             b_class = Variable(classes, volatile=True).cuda()
             pred_class, pred_feat = net(b_img)
+            #print("PRED FEAT :", pred_feat.shape)
             b_loss = criterion_triplet(pred_feat, b_class).data.cpu().numpy().squeeze()
             for x in range(b_loss.shape[0]):
                 if b_loss[x] < 1e-3:
@@ -243,7 +282,7 @@ def train_unsupervised_triplet(args,Dataset,train_Dataloader,net):
         pbar.close()
         print('Training total loss = %.3f'%(epoch_loss/iter_count))
         if e % args.save_every_n_epoch == 0:
-            torch.save(net.state_dict(),os.path.join(args.save_model_dir,'model_%d.ckpt'%(e)))
+            torch.save(net.state_dict(),os.path.join(args.save_model_dir,'model_%d.pth'%(e)))
         logger.plot()
 
 if __name__ == '__main__':
@@ -309,6 +348,7 @@ if __name__ == '__main__':
                 del state_dict[key]
 
         net.load_state_dict(state_dict)
+        #net = load_model(net, args.load_ckpt, lr = args.lr)
 
     if torch.cuda.is_available():
         net.cuda()
@@ -318,7 +358,7 @@ if __name__ == '__main__':
 
     ## train
     if True: #args.load_ckpt == None:
-        print('total data:',len(Dataset))
+        #print('total data:',len(Dataset))
         #print('training data:',Dataset.n_train)
         #print('validation data:',Dataset.n_val)
         if args.triplet:

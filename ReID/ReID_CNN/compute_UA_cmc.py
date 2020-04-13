@@ -34,6 +34,7 @@ def load_model(n_layer,load_ckpt):
 def get_sample_info(info_txt,n_sample):
     info_dict = defaultdict(list)
     file = open(info_txt,'r')
+    file.readline()
     for row in file:
         img_file,label = row.strip().split(' ')
         label = int(label)-1
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     # labels = torch.load('labels')
     print('loading model....')
     net = load_model(args.n_layer,args.load_ckpt)
-    net.cuda(1)
+    net.cuda(0)
     net.eval()
     print('get gallery....')
     gallery_dict = get_sample_info(args.info,6)
@@ -100,7 +101,7 @@ if __name__ == '__main__':
             img = compose(img)
             ID_img.append(img)
         ID_img = torch.stack(ID_img)
-        output = net(Variable(ID_img).cuda(1))
+        output = net(Variable(ID_img).cuda(0))
         features.append(output.cpu().data)
         labels.append(torch.ones(output.size(0)).long()*k)
     # features size :(9383,512) labels size : (9383)

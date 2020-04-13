@@ -48,7 +48,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print('loading model....')
-    model = ResNet_Loader(args.load_ckpt,args.n_layer,output_color=False,batch_size=64)
+    model = ResNet_Loader(args.load_ckpt,args.n_layer,output_color=False,batch_size=int(args.batch_size))
     
     with open(args.query_txt,'r') as f:
         query_txt = [q.strip() for q in f.readlines()]
@@ -58,19 +58,21 @@ if __name__ == '__main__':
         gallery_txt = gallery_txt[1:]
     print('inferencing q_features')
     q_features = model.inference(query_txt)
+
     print('inferencing g_features')
     g_features = model.inference(gallery_txt)
-    
+
     q_features = nn.functional.normalize(q_features,dim=1).cuda()
     g_features = nn.functional.normalize(g_features,dim=1).transpose(0,1).cuda()
     
     print('compute distance')
-    SimMat = -1 * torch.mm(q_features,g_features)
+    SimMat = torch.mm(q_features,g_features)
     SimMat = SimMat.cpu().transpose(0,1)
 
-    print(SimMat.size())
+    print("SimMat's Size: ", SimMat.size())
     
     SimMat = SimMat.numpy()
+    print("SimMat: ", SimMat)
     import scipy.io as sio
     sio.savemat(args.dis_mat,{'dist_CNN':SimMat})
     

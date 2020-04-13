@@ -61,6 +61,7 @@ class ResNet_Loader(object):
         for i,name in enumerate(file_name_list):
             img = Image.open(name)
             img = self.compose(img)
+            #print(img)
             batch_list.append(img)
             if (i+1)% self.batch_size == 0:
                 if self.output_color == False:

@@ -74,8 +74,8 @@ class sv_comp_Dataset(Dataset):
         self.makes, self.n_makes = Remap_Label(txt[:, 1].astype(int))
         self.models, self.n_models = Remap_Label(txt[:, 2].astype(int))
         # don't use remap on colors
-        self.colors  = txt[:,3].astype(int)
-        self.n_colors = 12
+        #self.colors  = txt[:,3].astype(int)
+        #self.n_colors = 12
         self.len = len(self.makes)
         # Validation split
         permute_idx = np.random.permutation(self.len)
@@ -104,7 +104,7 @@ class sv_comp_Dataset(Dataset):
         img_name = self.imgs[idx]
         make = self.makes[idx]
         model = self.models[idx]
-        color = self.colors[idx]
+        #color = self.colors[idx]
         img = Image.open(img_name)
         rng = np.random.randint(70,224)
         img = img.resize((rng,rng))
@@ -114,7 +114,8 @@ class sv_comp_Dataset(Dataset):
             img = self.transform_Tensor(img)
         else:
             img = self.transform_Tensor(self.transform_PIL(img))
-        return {'img':img,'make':int(make),'model':int(model),'color':int(color)}
+        #return {'img':img,'make':int(make),'model':int(model),'color':int(color)}
+        return {'img':img,'make':int(make),'model':int(model)}
     def __len__(self):
         return self.len
 
@@ -181,7 +182,7 @@ class VReID_Dataset(Dataset):
         ######################
         self.img_list = []
         self.label_list = []
-        self.color_list = []
+        #self.color_list = []
         self.type_list = []
         self.dataset = dataset
         file = open(txt_file,'r')
@@ -200,7 +201,7 @@ class VReID_Dataset(Dataset):
             self.n_color = len(set(self.color_list))
             self.n_type = len(set(self.type_list))
         else:
-            self.n_color = 0
+            #self.n_color = 0
             self.n_type = 0
         index = np.random.permutation(len(self.label_list))
         # np.save('train_val_index.npy',index)
@@ -254,12 +255,13 @@ class TripletImage_Dataset(Dataset):
         txt = np.loadtxt(db_txt, dtype=str)[1:]
         self.imgs = txt[:, 0]
         self.classes, self.n_id = Remap_Label(txt[:, 1].astype(int))
-        self.colors, self.n_colors = Remap_Label(txt[:,2].astype(int))
-        self.n_colors = 12
+        # self.colors, self.n_colors = Remap_Label(txt[:,2].astype(int))
+        # self.n_colors = 12
 
         if not Check_Min_Sample_Per_Class(self.classes, image_per_class_in_batch): 
             return ValueError('There is not enough samples per class! (Min {} samples required)'\
                               .format(image_per_class_in_batch))
+
         self.len = self.n_id
         self.class_in_batch = class_in_batch
         self.image_per_class_in_batch = image_per_class_in_batch
@@ -295,8 +297,8 @@ class TripletImage_Dataset(Dataset):
         select = np.nonzero(self.classes == id)[0]
         select = np.random.permutation(select)[:self.image_per_class_in_batch]
         # for color
-        color = int(self.colors[select][0])
-        output = {'img':[], 'class':[],'color':[]}
+        # color = int(self.colors[select][0])
+        output = {'img':[], 'class':[]}#,'color':[]}
         for i in select.tolist():
             img = Image.open(self.imgs[i])
             rng = np.random.randint(70,224)
@@ -309,10 +311,11 @@ class TripletImage_Dataset(Dataset):
                 img = self.transform_Tensor(self.transform_PIL(img))
             output['img'].append(img.unsqueeze(0))
             output['class'].append(id)
-            output['color'].append(color)
+            # output['color'].append(color)
         output['img'] = torch.cat(output['img'], dim=0)
+        output['class'] = list(map(int, output['class']))
         output['class'] = torch.LongTensor(output['class'])
-        output['color'] = torch.LongTensor(output['color'])
+        # output['color'] = torch.LongTensor(output['color'])
         return output
 
     def __len__(self):
